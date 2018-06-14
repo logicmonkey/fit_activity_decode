@@ -65,43 +65,6 @@ public:
         }
     }
 
-	static void PrintValuesInt(const fit::FieldBase& field)
-	{
-		for (FIT_UINT8 j = 0; j< (FIT_UINT8)field.GetNumValues(); j++)
-		{
-			std::wcout << L"       Val" << j << L": ";
-			switch (field.GetType())
-			{
-				// Get float 64 values for numeric types to receive values that have
-				// their scale and offset properly applied.
-			case FIT_BASE_TYPE_ENUM:
-			case FIT_BASE_TYPE_BYTE:
-			case FIT_BASE_TYPE_SINT8:
-			case FIT_BASE_TYPE_UINT8:
-			case FIT_BASE_TYPE_SINT16:
-			case FIT_BASE_TYPE_UINT16:
-			case FIT_BASE_TYPE_SINT32:
-			case FIT_BASE_TYPE_UINT32:
-			case FIT_BASE_TYPE_SINT64:
-			case FIT_BASE_TYPE_UINT64:
-			case FIT_BASE_TYPE_UINT8Z:
-			case FIT_BASE_TYPE_UINT16Z:
-			case FIT_BASE_TYPE_UINT32Z:
-			case FIT_BASE_TYPE_UINT64Z:
-			case FIT_BASE_TYPE_FLOAT32:
-			case FIT_BASE_TYPE_FLOAT64:
-				// float time makes no sense, use integer and add the ANT+/FIT epoch
-				std::wcout << 631065600 + field.GetUINT64Value(j); 
-				break;
-			case FIT_BASE_TYPE_STRING:
-				std::wcout << field.GetSTRINGValue(j);
-				break;
-			default:
-				break;
-			}
-			std::wcout << L" " << field.GetUnits().c_str() << L"\n";;
-		}
-	}
     void OnMesg(fit::Mesg& mesg)
     {
         printf("On Mesg:\n");
@@ -110,20 +73,10 @@ public:
         for (FIT_UINT16 i = 0; i < (FIT_UINT16)mesg.GetNumFields(); i++)
         {
             fit::Field* field = mesg.GetFieldByIndex(i);
-			std::wcout << L"   Field" << i << " (" << field->GetName().c_str() << ") has " << field->GetNumValues() << L" value(s)"; // PB \n removed
+     	    std::wcout << L"   Field" << i << " (" << field->GetName().c_str() << ") has " << field->GetNumValues() << L" value(s)"; // PB \n removed
 
-			std::string mystring = field->GetName().c_str();
-
-			if (mystring.compare("timestamp") == 0 ||
-			    mystring.compare("time_created") == 0 ||
-			    mystring.compare("start_time") == 0)
-			{
-				PrintValuesInt(*field);
-			}
-			else
-			{
-				PrintValues(*field);
-			}
+	    PrintValues(*field);
+		
         }
 
         for (auto devField : mesg.GetDeveloperFields())
@@ -341,9 +294,9 @@ int main(int argc, char* argv[])
    mesgBroadcaster.AddListener((fit::UserProfileMesgListener &)listener);
    mesgBroadcaster.AddListener((fit::MonitoringMesgListener &)listener);
    mesgBroadcaster.AddListener((fit::DeviceInfoMesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::MesgListener &)listener);
    */
    mesgBroadcaster.AddListener((fit::RecordMesgListener &)listener);
-   //mesgBroadcaster.AddListener((fit::MesgListener &)listener);
 
    try
    {
