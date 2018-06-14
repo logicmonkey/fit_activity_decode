@@ -339,7 +339,7 @@ int main(int argc, char* argv[])
    //PB mesgBroadcaster.AddListener((fit::UserProfileMesgListener &)listener);
    //PB mesgBroadcaster.AddListener((fit::MonitoringMesgListener &)listener);
    //PB mesgBroadcaster.AddListener((fit::DeviceInfoMesgListener &)listener);
-   mesgBroadcaster.AddListener((fit::RecordMesgListener&)listener);
+   //PB mesgBroadcaster.AddListener((fit::RecordMesgListener&)listener);
    mesgBroadcaster.AddListener((fit::MesgListener &)listener);
 
    try
