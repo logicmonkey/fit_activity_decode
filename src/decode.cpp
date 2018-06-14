@@ -242,19 +242,19 @@ public:
        {
            if ( !namePrinted )
            {
-               printf( "   %s", profileField->name.c_str() );
+               printf( "   %s\n", profileField->name.c_str() );
                namePrinted = FIT_TRUE;
            }
 
            if ( FIT_NULL != dynamic_cast<const fit::Field*>( field ) )
            {
                // Native Field
-               printf( "  native: " );
+               printf( "      native: " );
            }
            else
            {
                // Developer Field
-               printf( "  override: " );
+               printf( "      override: " );
            }
 
             switch (field->GetType())
@@ -335,11 +335,13 @@ int main(int argc, char* argv[])
       printf("FIT file integrity failed.\nAttempting to decode...\n");
    }
 
-   //PB mesgBroadcaster.AddListener((fit::FileIdMesgListener &)listener);
-   //PB mesgBroadcaster.AddListener((fit::UserProfileMesgListener &)listener);
-   //PB mesgBroadcaster.AddListener((fit::MonitoringMesgListener &)listener);
-   //PB mesgBroadcaster.AddListener((fit::DeviceInfoMesgListener &)listener);
-   //PB mesgBroadcaster.AddListener((fit::RecordMesgListener&)listener);
+   /* These are less interesting than activity file content -=:PB:=-
+   mesgBroadcaster.AddListener((fit::FileIdMesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::UserProfileMesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::MonitoringMesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::DeviceInfoMesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::RecordMesgListener &)listener);
+   */
    mesgBroadcaster.AddListener((fit::MesgListener &)listener);
 
    try
