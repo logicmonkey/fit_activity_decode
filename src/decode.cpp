@@ -115,8 +115,8 @@ public:
 			std::string mystring = field->GetName().c_str();
 
 			if (mystring.compare("timestamp") == 0 ||
-				mystring.compare("time_created") == 0 ||
-				mystring.compare("start_time") == 0)
+			    mystring.compare("time_created") == 0 ||
+			    mystring.compare("start_time") == 0)
 			{
 				PrintValuesInt(*field);
 			}
@@ -242,14 +242,14 @@ public:
        {
            if ( !namePrinted )
            {
-               printf( "   %s\n", profileField->name.c_str() );
+               printf( "   %s ", profileField->name.c_str() ); // PB removed \n from end
                namePrinted = FIT_TRUE;
            }
 
            if ( FIT_NULL != dynamic_cast<const fit::Field*>( field ) )
            {
                // Native Field
-               printf( "      native: " );
+               //PB printf( "      native: " );
            }
            else
            {
@@ -292,6 +292,7 @@ public:
    {
         printf( "Record:\n" );
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::HeartRate);
+        PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Timestamp);
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Cadence );
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Distance );
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Speed );
@@ -340,9 +341,9 @@ int main(int argc, char* argv[])
    mesgBroadcaster.AddListener((fit::UserProfileMesgListener &)listener);
    mesgBroadcaster.AddListener((fit::MonitoringMesgListener &)listener);
    mesgBroadcaster.AddListener((fit::DeviceInfoMesgListener &)listener);
-   mesgBroadcaster.AddListener((fit::RecordMesgListener &)listener);
    */
-   mesgBroadcaster.AddListener((fit::MesgListener &)listener);
+   mesgBroadcaster.AddListener((fit::RecordMesgListener &)listener);
+   //mesgBroadcaster.AddListener((fit::MesgListener &)listener);
 
    try
    {
