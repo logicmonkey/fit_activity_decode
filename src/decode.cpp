@@ -191,11 +191,13 @@ public:
        const fit::Profile::FIELD * profileField = fit::Profile::GetField( mesg.GetNum(), fieldNum );
        FIT_BOOL namePrinted = FIT_FALSE;
 
+       namePrinted = FIT_TRUE;  // PB comment this out to print field names
+
        for ( const fit::FieldBase* field : fields )
        {
            if ( !namePrinted )
            {
-               printf( "   %s ", profileField->name.c_str() ); // PB removed \n from end
+               printf( "%s ", profileField->name.c_str() ); // PB removed \n from end
                namePrinted = FIT_TRUE;
            }
 
@@ -210,45 +212,45 @@ public:
                printf( "      override: " );
            }
 
-            switch (field->GetType())
-            {
-                // Get float 64 values for numeric types to receive values that have
-                // their scale and offset properly applied.
-                case FIT_BASE_TYPE_ENUM:
-                case FIT_BASE_TYPE_BYTE:
-                case FIT_BASE_TYPE_SINT8:
-                case FIT_BASE_TYPE_UINT8:
-                case FIT_BASE_TYPE_SINT16:
-                case FIT_BASE_TYPE_UINT16:
-                case FIT_BASE_TYPE_SINT32:
-                case FIT_BASE_TYPE_UINT32:
-                case FIT_BASE_TYPE_SINT64:
-                case FIT_BASE_TYPE_UINT64:
-                case FIT_BASE_TYPE_UINT8Z:
-                case FIT_BASE_TYPE_UINT16Z:
-                case FIT_BASE_TYPE_UINT32Z:
-                case FIT_BASE_TYPE_UINT64Z:
-                case FIT_BASE_TYPE_FLOAT32:
-                case FIT_BASE_TYPE_FLOAT64:
-                    printf("%f\n", field->GetFLOAT64Value());
-                    break;
-                case FIT_BASE_TYPE_STRING:
-                    printf("%ls\n", field->GetSTRINGValue().c_str());
-                    break;
-                default:
-                    break;
-            }
+           switch (field->GetType())
+           {
+               // Get float 64 values for numeric types to receive values that have
+               // their scale and offset properly applied.
+               case FIT_BASE_TYPE_ENUM:
+               case FIT_BASE_TYPE_BYTE:
+               case FIT_BASE_TYPE_SINT8:
+               case FIT_BASE_TYPE_UINT8:
+               case FIT_BASE_TYPE_SINT16:
+               case FIT_BASE_TYPE_UINT16:
+               case FIT_BASE_TYPE_SINT32:
+               case FIT_BASE_TYPE_UINT32:
+               case FIT_BASE_TYPE_SINT64:
+               case FIT_BASE_TYPE_UINT64:
+               case FIT_BASE_TYPE_UINT8Z:
+               case FIT_BASE_TYPE_UINT16Z:
+               case FIT_BASE_TYPE_UINT32Z:
+               case FIT_BASE_TYPE_UINT64Z:
+               case FIT_BASE_TYPE_FLOAT32:
+               case FIT_BASE_TYPE_FLOAT64:
+                   printf("%f, ", field->GetFLOAT64Value());
+                   break;
+               case FIT_BASE_TYPE_STRING:
+                   printf("%ls, ", field->GetSTRINGValue().c_str());
+                   break;
+               default:
+                   break;
+           }
        }
    }
 
    void OnMesg( fit::RecordMesg& record ) override
    {
-        printf( "Record:\n" );
-        PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::HeartRate);
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Timestamp);
-        PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Cadence );
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Distance );
         PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Speed );
+        //PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::Cadence );
+        //PrintOverrideValues( record, fit::RecordMesg::FieldDefNum::HeartRate);
+        printf("\n");
    }
 
    void OnDeveloperFieldDescription( const fit::DeveloperFieldDescription& desc ) override
@@ -268,7 +270,7 @@ int main(int argc, char* argv[])
    Listener listener;
    std::fstream file;
 
-   printf("FIT Decode Example Application\n");
+   printf("Timestamp, Distance, Speed,\n");
 
    if (argc != 2)
    {
@@ -308,7 +310,7 @@ int main(int argc, char* argv[])
       return -1;
    }
 
-   printf("Decoded FIT file %s.\n", argv[1]);
+   //printf("Decoded FIT file %s.\n", argv[1]);
 
    return 0;
 }
