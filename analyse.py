@@ -45,7 +45,7 @@ if __name__ == '__main__' :
     starttime   = timestamp[start_index]
     startdist   = distance[start_index]
 
-    # move time zero to the start_index: time values before start become negative
+    # move time zero to the start_index: values before start become negative
     for index in range(len(timestamp)):
         timestamp[index] -= starttime
 
@@ -66,7 +66,7 @@ if __name__ == '__main__' :
     spd_axes = plt.subplot(gs[0,0])
     dst_axes = plt.subplot(gs[1,0])
 
-    spd_dots, = spd_axes.plot(timestamp, speed, 'r')
+    spd_line, = spd_axes.plot(timestamp, speed, 'r')
     spd_axes.grid(b=True)
     spd_axes.set_ylabel(spd_label)
 
