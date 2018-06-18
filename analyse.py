@@ -61,21 +61,52 @@ if __name__ == '__main__' :
     spd_label = 'Speed\n(km/h)'
     dst_label = 'Distance\n(km)'
 
-    # fig, (spd_axes, dst_axes) = plt.subplots(2, sharex=True)
-    gs = GridSpec(2,1) # rows, columns
-    spd_axes = plt.subplot(gs[0,0])
-    dst_axes = plt.subplot(gs[1,0], sharex=spd_axes)
+    fig, (spd_axes, dst_axes) = plt.subplots(2, sharex=True)
 
-    spd_line, = spd_axes.plot(timestamp, speed, 'r')
-    spd_axes.grid(b=True)
+    spd_scat = spd_axes.plot(timestamp, speed, color='r')
+    dst_scat = dst_axes.plot(timestamp, distance, color='b')
+
+    spd_scat = spd_axes.scatter(timestamp, speed, color='r')
+    dst_scat = dst_axes.scatter(timestamp, distance, color='b')
+
+    spd_axes.grid()
+    dst_axes.grid()
+
     spd_axes.set_ylabel(spd_label)
-
-    dst_line, = dst_axes.plot(timestamp, distance, 'b')
-    dst_axes.grid(b=True)
     dst_axes.set_ylabel(dst_label)
 
     spd_axes.set_title(xtitle)
     dst_axes.set_xlabel(xlabel)
+
+    spd_anno = spd_axes.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
+                        bbox=dict(boxstyle="round", fc="w"),
+                        arrowprops=dict(arrowstyle="->"))
+
+    spd_anno.set_visible(False)
+
+    def spd_update_anno(ind):
+        pos = spd_scat.get_offsets()[ind["ind"][0]]
+        spd_anno.xy = pos
+        text = "{}, {}".format(pos[0], pos[1])
+        spd_anno.set_text(text)
+        #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
+        spd_anno.get_bbox_patch().set_alpha(0.4)
+
+    def hover(event):
+        spd_vis = spd_anno.get_visible()
+
+        if event.inaxes == spd_axes:
+            cont, ind = spd_scat.contains(event)
+            if cont:
+                spd_update_anno(ind)
+                spd_anno.set_visible(True)
+                fig.canvas.draw_idle()
+            else:
+                if spd_vis:
+                    spd_anno.set_visible(False)
+                    fig.canvas.draw_idle()
+
+    fig.canvas.mpl_connect("motion_notify_event", hover)
 
     plt.tight_layout()
     plt.show()
