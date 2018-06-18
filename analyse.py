@@ -50,10 +50,10 @@ if __name__ == '__main__' :
         timestamp[index] -= starttime
 
         # use actual distance prior to start and modulus 1km thereafter
-        km, m = divmod(distance[index]-startdist, 1000)
         if distance[index] < startdist:
             distance[index] /= 1000
         else:
+            km, m = divmod(distance[index]-startdist, 1000)
             distance[index] = m/1000
 
     xlabel    = 'Time (seconds)'
