@@ -64,7 +64,7 @@ if __name__ == '__main__' :
     # fig, (spd_axes, dst_axes) = plt.subplots(2, sharex=True)
     gs = GridSpec(2,1) # rows, columns
     spd_axes = plt.subplot(gs[0,0])
-    dst_axes = plt.subplot(gs[1,0])
+    dst_axes = plt.subplot(gs[1,0], sharex=spd_axes)
 
     spd_line, = spd_axes.plot(timestamp, speed, 'r')
     spd_axes.grid(b=True)
