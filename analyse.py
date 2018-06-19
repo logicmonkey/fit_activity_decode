@@ -91,7 +91,7 @@ if __name__ == '__main__' :
 
     def hover(event):
         spd_vis = spd_anno.get_visible()
-        dst_vis = spd_anno.get_visible()
+        dst_vis = dst_anno.get_visible()
 
         if event.inaxes == spd_axes:
             cont, ind = spd_scat.contains(event) # mouse event on scatter obj?
