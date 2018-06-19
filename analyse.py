@@ -87,7 +87,8 @@ if __name__ == '__main__' :
     def spd_update_anno(ind):
         pos = spd_scat.get_offsets()[ind["ind"][0]]
         spd_anno.xy = pos
-        text = "{}, {}".format(pos[0], pos[1])
+        minutes, seconds = divmod(pos[0], 60)
+        text = "Time {:02d}:{:02d}  {:.1f}km/h".format(int(minutes), int(seconds), pos[1])
         spd_anno.set_text(text)
         #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
         spd_anno.get_bbox_patch().set_alpha(0.4)
