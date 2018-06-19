@@ -56,41 +56,30 @@ if __name__ == '__main__' :
             km, m = divmod(distance[index]-startdist, 1000)
             distance[index] = m/1000
 
-    xlabel    = 'Time (seconds)'
-    xtitle    = 'Data source: {}'.format(filename)
-    spd_label = 'Speed\n(km/h)'
-    dst_label = 'Distance\n(km)'
-
+    # simple matplotlib figure with two subplots speed and distance versus time
     fig, (spd_axes, dst_axes) = plt.subplots(2, sharex=True)
 
-    spd_scat = spd_axes.plot(timestamp, speed, color='r')
-    dst_scat = dst_axes.plot(timestamp, distance, color='b')
+    spd_axes.plot(timestamp, speed, color='r')
+    dst_axes.plot(timestamp, distance, color='b')
+    spd_axes.grid()
+    dst_axes.grid()
+    spd_axes.set_title('Data source: {}'.format(filename))
+    spd_axes.set_ylabel('Speed\n(km/h)')
+    dst_axes.set_ylabel('Distance\n(km)')
+    dst_axes.set_xlabel('Time (seconds)')
 
+    # ANNOTATION START - comment out between START and END for simple plot
+    # create objects for xy scatters because these can be queried and annotated
     spd_scat = spd_axes.scatter(timestamp, speed, color='r')
     dst_scat = dst_axes.scatter(timestamp, distance, color='b')
 
-    spd_axes.grid()
-    dst_axes.grid()
-
-    spd_axes.set_ylabel(spd_label)
-    dst_axes.set_ylabel(dst_label)
-
-    spd_axes.set_title(xtitle)
-    dst_axes.set_xlabel(xlabel)
-
-    spd_anno = spd_axes.annotate("",
+    spd_anno = spd_axes.annotate("", # set the annotation text based on value
                    xy=(0,0), xytext=(20,20),
                    textcoords="offset points",
                    bbox=dict(boxstyle="round", fc="w"),
                    arrowprops=dict(arrowstyle="->"))
 
     spd_anno.set_visible(False)
-
-    def spd_update_anno(ind):
-        pos = spd_scat.get_offsets()[ind["ind"][0]]
-        spd_anno.xy = pos
-        minutes, seconds = divmod(pos[0], 60)
-        spd_anno.set_text("Time {:02d}:{:02d}  {:.1f}km/h".format(int(minutes), int(seconds), pos[1]))
 
     def hover(event):
         spd_vis = spd_anno.get_visible()
@@ -99,13 +88,17 @@ if __name__ == '__main__' :
             cont, ind = spd_scat.contains(event)
             spd_anno.set_visible(cont)
             if cont:
-                spd_update_anno(ind)
+                pos = spd_scat.get_offsets()[ind["ind"][0]]
+                spd_anno.xy = pos
+                minutes, seconds = divmod(int(pos[0]), 60)
+                spd_anno.set_text("Time {:02d}:{:02d}  {:.1f}km/h".format(minutes, seconds, pos[1]))
                 fig.canvas.draw_idle()
             else:
                 if spd_vis:
                     fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
+    # ANNOTATION END
 
     plt.tight_layout()
     plt.show()
