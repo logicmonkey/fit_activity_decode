@@ -56,6 +56,7 @@ if __name__ == '__main__' :
             km, m = divmod(distance[index]-startdist, 1000)
             distance[index] = m/1000
 
+    # SIMPLE START
     # simple matplotlib figure with two subplots speed and distance versus time
     fig, (spd_axes, dst_axes) = plt.subplots(2, sharex=True)
 
@@ -67,11 +68,11 @@ if __name__ == '__main__' :
     spd_axes.set_ylabel('Speed\n(km/h)')
     dst_axes.set_ylabel('Distance\n(km)')
     dst_axes.set_xlabel('Time (seconds)')
+    # SIMPLE END
 
     # ANNOTATION START - comment out between START and END for simple plot
-    # create objects for xy scatters because these can be queried and annotated
-    spd_scat = spd_axes.scatter(timestamp, speed, color='r')
-    dst_scat = dst_axes.scatter(timestamp, distance, color='b')
+    # create object for speed xy scatter because this can be queried and annotated
+    spd_scat = spd_axes.scatter(timestamp, speed, color='r', marker='.')
 
     spd_anno = spd_axes.annotate("", # set the annotation text based on value
                    xy=(0,0), xytext=(20,20),
@@ -85,7 +86,7 @@ if __name__ == '__main__' :
         spd_vis = spd_anno.get_visible()
 
         if event.inaxes == spd_axes:
-            cont, ind = spd_scat.contains(event)
+            cont, ind = spd_scat.contains(event) # mouse event on scatter obj?
             spd_anno.set_visible(cont)
             if cont:
                 pos = spd_scat.get_offsets()[ind["ind"][0]]
@@ -100,5 +101,7 @@ if __name__ == '__main__' :
     fig.canvas.mpl_connect("motion_notify_event", hover)
     # ANNOTATION END
 
+    # SIMPLE START
     plt.tight_layout()
     plt.show()
+    # SIMPLE END
