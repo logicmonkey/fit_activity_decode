@@ -78,9 +78,11 @@ if __name__ == '__main__' :
     spd_axes.set_title(xtitle)
     dst_axes.set_xlabel(xlabel)
 
-    spd_anno = spd_axes.annotate("", xy=(0,0), xytext=(20,20),textcoords="offset points",
-                        bbox=dict(boxstyle="round", fc="w"),
-                        arrowprops=dict(arrowstyle="->"))
+    spd_anno = spd_axes.annotate("",
+                   xy=(0,0), xytext=(20,20),
+                   textcoords="offset points",
+                   bbox=dict(boxstyle="round", fc="w"),
+                   arrowprops=dict(arrowstyle="->"))
 
     spd_anno.set_visible(False)
 
@@ -88,23 +90,19 @@ if __name__ == '__main__' :
         pos = spd_scat.get_offsets()[ind["ind"][0]]
         spd_anno.xy = pos
         minutes, seconds = divmod(pos[0], 60)
-        text = "Time {:02d}:{:02d}  {:.1f}km/h".format(int(minutes), int(seconds), pos[1])
-        spd_anno.set_text(text)
-        #annot.get_bbox_patch().set_facecolor(cmap(norm(c[ind["ind"][0]])))
-        spd_anno.get_bbox_patch().set_alpha(0.4)
+        spd_anno.set_text("Time {:02d}:{:02d}  {:.1f}km/h".format(int(minutes), int(seconds), pos[1]))
 
     def hover(event):
         spd_vis = spd_anno.get_visible()
 
         if event.inaxes == spd_axes:
             cont, ind = spd_scat.contains(event)
+            spd_anno.set_visible(cont)
             if cont:
                 spd_update_anno(ind)
-                spd_anno.set_visible(True)
                 fig.canvas.draw_idle()
             else:
                 if spd_vis:
-                    spd_anno.set_visible(False)
                     fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
