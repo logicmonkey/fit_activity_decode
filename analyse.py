@@ -44,6 +44,8 @@ if __name__ == '__main__' :
 
     starttime   = timestamp[start_index]
     startdist   = distance[start_index]
+    kilometres  = [0] # first in list of kilometre start times
+    current_km  = 0
 
     # move time zero to the start_index: values before start become negative
     for index in range(len(timestamp)):
@@ -54,7 +56,21 @@ if __name__ == '__main__' :
             distance[index] /= 1000
         else:
             km, m = divmod(distance[index]-startdist, 1000)
+            if km > current_km:
+                kilometres.append(timestamp[index])
+                current_km = km
             distance[index] = m/1000
+
+    def get_km(seconds):
+        count = -1
+        if seconds > kilometres[-1]:
+            return len(kilometres)-1
+
+        for i in kilometres: # list of kilometre start times
+            if i <= seconds:
+                count += 1
+            else:
+                return count
 
     # SIMPLE START
     # simple matplotlib figure with two subplots speed and distance versus time
@@ -113,7 +129,7 @@ if __name__ == '__main__' :
                 pos = dst_scat.get_offsets()[ind["ind"][0]]
                 dst_anno.xy = pos
                 minutes, seconds = divmod(int(pos[0]), 60)
-                dst_anno.set_text("Time {:02d}:{:02d}  {:.1f}km".format(minutes, seconds, pos[1]))
+                dst_anno.set_text("Time {:02d}:{:02d}  {:.2f}km".format(minutes, seconds, get_km(pos[0]) + pos[1]))
                 fig.canvas.draw_idle()
             else:
                 if dst_vis:
