@@ -73,17 +73,25 @@ if __name__ == '__main__' :
     # ANNOTATION START - comment out between START and END for simple plot
     # create object for speed xy scatter because this can be queried and annotated
     spd_scat = spd_axes.scatter(timestamp, speed, color='r', marker='.')
+    dst_scat = dst_axes.scatter(timestamp, distance, color='b', marker='.')
 
     spd_anno = spd_axes.annotate("", # set the annotation text based on value
                    xy=(0,0), xytext=(20,20),
                    textcoords="offset points",
                    bbox=dict(boxstyle="round", fc="w"),
                    arrowprops=dict(arrowstyle="->"))
+    dst_anno = dst_axes.annotate("", # set the annotation text based on value
+                   xy=(0,0), xytext=(20,20),
+                   textcoords="offset points",
+                   bbox=dict(boxstyle="round", fc="w"),
+                   arrowprops=dict(arrowstyle="->"))
 
     spd_anno.set_visible(False)
+    dst_anno.set_visible(False)
 
     def hover(event):
         spd_vis = spd_anno.get_visible()
+        dst_vis = spd_anno.get_visible()
 
         if event.inaxes == spd_axes:
             cont, ind = spd_scat.contains(event) # mouse event on scatter obj?
@@ -96,6 +104,19 @@ if __name__ == '__main__' :
                 fig.canvas.draw_idle()
             else:
                 if spd_vis:
+                    fig.canvas.draw_idle()
+
+        if event.inaxes == dst_axes:
+            cont, ind = dst_scat.contains(event) # mouse event on scatter obj?
+            dst_anno.set_visible(cont)
+            if cont:
+                pos = dst_scat.get_offsets()[ind["ind"][0]]
+                dst_anno.xy = pos
+                minutes, seconds = divmod(int(pos[0]), 60)
+                dst_anno.set_text("Time {:02d}:{:02d}  {:.1f}km".format(minutes, seconds, pos[1]))
+                fig.canvas.draw_idle()
+            else:
+                if dst_vis:
                     fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
