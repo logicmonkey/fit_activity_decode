@@ -64,13 +64,13 @@ if __name__ == '__main__' :
     def get_km(seconds):
         count = -1
         if seconds > kilometres[-1]:
-            return len(kilometres)-1
+            return (0, len(kilometres)-1)
 
-        for i in kilometres: # list of kilometre start times
-            if i <= seconds:
+        for km in kilometres: # list of kilometre start times
+            if km <= seconds:
                 count += 1
             else:
-                return count
+                return (kilometres[count+1] - kilometres[count], count)
 
     # SIMPLE START
     # simple matplotlib figure with two subplots speed and distance versus time
@@ -116,7 +116,7 @@ if __name__ == '__main__' :
                 pos = spd_scat.get_offsets()[ind["ind"][0]]
                 spd_anno.xy = pos
                 minutes, seconds = divmod(int(pos[0]), 60)
-                spd_anno.set_text("Time {:02d}:{:02d}  {:.1f}km/h".format(minutes, seconds, pos[1]))
+                spd_anno.set_text("Time {:02d}:{:02d}\nSpeed {:.1f}km/h".format(minutes, seconds, pos[1]))
                 fig.canvas.draw_idle()
             else:
                 if spd_vis:
@@ -129,7 +129,9 @@ if __name__ == '__main__' :
                 pos = dst_scat.get_offsets()[ind["ind"][0]]
                 dst_anno.xy = pos
                 minutes, seconds = divmod(int(pos[0]), 60)
-                dst_anno.set_text("Time {:02d}:{:02d}  {:.2f}km".format(minutes, seconds, get_km(pos[0]) + pos[1]))
+                kmseconds, kmnumber = get_km(pos[0])
+                paceminutes, paceseconds = divmod(kmseconds, 60)
+                dst_anno.set_text("Time {:02d}:{:02d}\nDistance {:.2f}km\nPace {:02d}:{:02d}".format(minutes, seconds, kmnumber + pos[1], paceminutes, paceseconds))
                 fig.canvas.draw_idle()
             else:
                 if dst_vis:
