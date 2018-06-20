@@ -48,6 +48,10 @@ if __name__ == '__main__' :
     if len(sys.argv) == 2:
         filename = sys.argv[1]
 
+    if len(sys.argv) == 1:
+        print("Usage: analyse.py [-r|--race] <decodedfitfle.csv>\n")
+        exit()
+
     timestamp, distance, speed = extract(filename)
 
     if racemode:
