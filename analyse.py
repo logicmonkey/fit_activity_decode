@@ -36,11 +36,25 @@ def maxdiff(dataset):
 
 if __name__ == '__main__' :
 
-    filename = sys.argv[1]
+    racemode = False
+
+    if len(sys.argv) == 3:
+        filename = sys.argv[2]
+        if (sys.argv[1] == '--race') or (sys.argv[1] == '-r'):
+           racemode = True
+        else:
+           print("Unrecognised option. Use none, --race or -r\n")
+
+    if len(sys.argv) == 2:
+        filename = sys.argv[1]
 
     timestamp, distance, speed = extract(filename)
-    # assume race start has the maximum acceleration
-    start_index = maxdiff(speed)
+
+    if racemode:
+        # assume race start has the maximum acceleration
+        start_index = maxdiff(speed)
+    else:
+        start_index = 0
 
     starttime   = timestamp[start_index]
     startdist   = distance[start_index]
