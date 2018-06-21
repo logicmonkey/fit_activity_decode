@@ -122,16 +122,16 @@ if __name__ == '__main__' :
 
     def get_km(seconds):
         if seconds < 0: # report 0 pace for pre-start
-            return (0, 0)
-        elif seconds > kilometres[-1]: # report 0 pace for final part-kilometre
-            return (0, len(kilometres)-1)
+            return 0, 0
+        elif seconds >= kilometres[-1]: # report 0 pace for final part-kilometre
+            return 0, len(kilometres)-1
 
         count = 0
         for km in kilometres[1:]: # list of kilometre start times
             if km <= seconds:
                 count += 1
             else:
-                return (kilometres[count+1] - kilometres[count], count)
+                return kilometres[count+1] - kilometres[count], count
 
     # SIMPLE START
     # simple matplotlib figure with two subplots speed and distance versus time
