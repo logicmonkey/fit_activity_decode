@@ -3,13 +3,15 @@
 import sys
 import csv
 import matplotlib.pyplot as plt
+from fitparse import FitFile
+from datetime import timedelta
 
 def extract(filename, mode):
     timestamp = []
     distance = []
     speed = []
 
-    if mode == 'cvs':
+    if csvmode:
         with open(filename) as csvfile:
             alldata = csv.reader(csvfile, delimiter=',')
             oneskipped = False
@@ -20,7 +22,16 @@ def extract(filename, mode):
                     speed.append(float(row[2])*3.6) # convert m/s to km/h here
                 oneskipped = True
     else:
-        pass
+        fitfile = FitFile(filename)
+
+        for record in fitfile.get_messages('record'):
+            for field in record:
+                if field.name == 'timestamp':
+                    timestamp.append(field.value)
+                elif field.name == 'distance':
+                    distance.append(field.value)
+                elif field.name == 'speed':
+                    speed.append(field.value*3.6) # convert m/s to km/h here
 
     return timestamp, distance, speed
 
@@ -39,22 +50,42 @@ def maxdiff(dataset):
 if __name__ == '__main__' :
 
     racemode = False
+    csvmode = False
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 4:
+        filename = sys.argv[3]
+
+        if (sys.argv[1] == '--race') or (sys.argv[1] == '-r') or (sys.argv[2] == '--race') or (sys.argv[2] == '-r'):
+            racemode = True
+
+        if (sys.argv[1] == '--csv') or (sys.argv[1] == '-c') or (sys.argv[2] == '--csv') or (sys.argv[2] == '-c'):
+            csvmode = True
+
+        if not racemode or not csvmode:
+            print("Unrecognised option. Use none, --race or -r, --csv or -c\n")
+            print("Usage: analyse.py [-r|--race] [-c|--csv] <filename>\n")
+
+    elif len(sys.argv) == 3:
         filename = sys.argv[2]
-        if (sys.argv[1] == '--race') or (sys.argv[1] == '-r'):
-           racemode = True
-        else:
-           print("Unrecognised option. Use none, --race or -r\n")
 
-    if len(sys.argv) == 2:
+        if (sys.argv[1] == '--race') or (sys.argv[1] == '-r'):
+            racemode = True
+
+        elif (sys.argv[1] == '--csv') or (sys.argv[1] == '-c'):
+            csvmode = True
+
+        else:
+            print("Unrecognised option. Use none, --race or -r, --csv or -c\n")
+            print("Usage: analyse.py [-r|--race] [-c|--csv] <filename>\n")
+
+    elif len(sys.argv) == 2:
         filename = sys.argv[1]
 
-    if len(sys.argv) == 1:
-        print("Usage: analyse.py [-r|--race] <decodedfitfle.csv>\n")
+    elif len(sys.argv) == 1:
+        print("Usage: analyse.py [-r|--race] [-c|--csv] <filename>\n")
         exit()
 
-    timestamp, distance, speed = extract(filename, 'cvs')
+    timestamp, distance, speed = extract(filename, csvmode)
 
     if racemode:
         # assume race start has the maximum acceleration
@@ -62,31 +93,41 @@ if __name__ == '__main__' :
     else:
         start_index = 0
 
-    starttime   = timestamp[start_index]
-    startdist   = distance[start_index]
-    kilometres  = [0] # first in list of kilometre start times
-    current_km  = 0
+    starttime  = timestamp[start_index]
+    startdist  = distance[start_index]
+    kilometres = [0] # first in list of kilometre start times
+    current_km = 0
 
     # move time zero to the start_index: values before start become negative
     for index in range(len(timestamp)):
-        timestamp[index] -= starttime
+        if csvmode:
+            timestamp[index] -= starttime # csv data uses integer epoch offsets
+        else:
+            # negative timedeltas behave strangely, so reverse and negate
+            if (timestamp[index] - starttime) < timedelta(0):
+                timestamp[index] = -1 * (starttime - timestamp[index]).seconds
+            else:
+                timestamp[index] = (timestamp[index] - starttime).seconds
 
         # use actual distance prior to start and modulus 1km thereafter
         if distance[index] < startdist:
-            distance[index] /= 1000
+            km, m = divmod(startdist - distance[index], 1000)
+            distance[index] = m/-1000
         else:
             km, m = divmod(distance[index]-startdist, 1000)
+            distance[index] = m/1000
             if km > current_km:
                 kilometres.append(timestamp[index])
                 current_km = km
-            distance[index] = m/1000
 
     def get_km(seconds):
-        count = -1
-        if seconds > kilometres[-1]:
+        if seconds < 0: # report 0 pace for pre-start
+            return (0, 0)
+        elif seconds > kilometres[-1]: # report 0 pace for final part-kilometre
             return (0, len(kilometres)-1)
 
-        for km in kilometres: # list of kilometre start times
+        count = 0
+        for km in kilometres[1:]: # list of kilometre start times
             if km <= seconds:
                 count += 1
             else:
@@ -138,9 +179,8 @@ if __name__ == '__main__' :
                 minutes, seconds = divmod(int(pos[0]), 60)
                 spd_anno.set_text("Time {:02d}:{:02d}\nSpeed {:.1f}km/h".format(minutes, seconds, pos[1]))
                 fig.canvas.draw_idle()
-            else:
-                if spd_vis:
-                    fig.canvas.draw_idle()
+            elif spd_vis:
+                fig.canvas.draw_idle()
 
         if event.inaxes == dst_axes:
             cont, ind = dst_scat.contains(event) # mouse event on scatter obj?
@@ -153,9 +193,8 @@ if __name__ == '__main__' :
                 paceminutes, paceseconds = divmod(kmseconds, 60)
                 dst_anno.set_text("Time {:02d}:{:02d}\nDistance {:.2f}km\nPace {:02d}:{:02d}".format(minutes, seconds, kmnumber + pos[1], paceminutes, paceseconds))
                 fig.canvas.draw_idle()
-            else:
-                if dst_vis:
-                    fig.canvas.draw_idle()
+            elif dst_vis:
+                fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
     # ANNOTATION END
