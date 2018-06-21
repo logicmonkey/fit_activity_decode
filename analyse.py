@@ -3,22 +3,24 @@
 import sys
 import csv
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 
-def extract(filename):
+def extract(filename, mode):
     timestamp = []
     distance = []
     speed = []
 
-    with open(filename) as csvfile:
-        alldata = csv.reader(csvfile, delimiter=',')
-        oneskipped = False
-        for row in alldata: # discard line containing column title text
-            if oneskipped:
-                timestamp.append(int(float(row[0])))
-                distance.append(float(row[1]))
-                speed.append(float(row[2])*3.6) # convert m/s to km/h here
-            oneskipped = True
+    if mode == 'cvs':
+        with open(filename) as csvfile:
+            alldata = csv.reader(csvfile, delimiter=',')
+            oneskipped = False
+            for row in alldata: # discard line containing column title text
+                if oneskipped:
+                    timestamp.append(int(float(row[0])))
+                    distance.append(float(row[1]))
+                    speed.append(float(row[2])*3.6) # convert m/s to km/h here
+                oneskipped = True
+    else:
+        pass
 
     return timestamp, distance, speed
 
@@ -52,7 +54,7 @@ if __name__ == '__main__' :
         print("Usage: analyse.py [-r|--race] <decodedfitfle.csv>\n")
         exit()
 
-    timestamp, distance, speed = extract(filename)
+    timestamp, distance, speed = extract(filename, 'cvs')
 
     if racemode:
         # assume race start has the maximum acceleration
