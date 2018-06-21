@@ -3,8 +3,8 @@
 import sys
 import csv
 import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 from fitparse import FitFile
+from datetime import timedelta
 
 def extract(filename):
     timestamp = []
@@ -14,13 +14,13 @@ def extract(filename):
     fitfile = FitFile(filename)
 
     for record in fitfile.get_messages('record'):
-        for record_data in record:
-            if record_data.name == 'timestamp':
-                timestamp.append(record_data.value)
-            elif record_data.name == 'distance':
-                distance.append(record_data.value)
-            elif record_data.name == 'speed':
-                speed.append(record_data.value*3.6) # convert m/s to km/h here
+        for field in record:
+            if field.name == 'timestamp':
+                timestamp.append(field.value)
+            elif field.name == 'distance':
+                distance.append(field.value)
+            elif field.name == 'speed':
+                speed.append(field.value*3.6) # convert m/s to km/h here
 
     return timestamp, distance, speed
 
@@ -70,24 +70,31 @@ if __name__ == '__main__' :
 
     # move time zero to the start_index: values before start become negative
     for index in range(len(timestamp)):
-        timestamp[index] = (timestamp[index] - starttime).seconds
+        # negative timedeltas behave strangely, so reverse and negate
+        if (timestamp[index] - starttime) < timedelta(0):
+            timestamp[index] = -1 * (starttime - timestamp[index]).seconds
+        else:
+            timestamp[index] = (timestamp[index] - starttime).seconds
 
         # use actual distance prior to start and modulus 1km thereafter
         if distance[index] < startdist:
-            distance[index] /= 1000
+            km, m = divmod(startdist - distance[index], 1000)
+            distance[index] = m/-1000
         else:
             km, m = divmod(distance[index]-startdist, 1000)
+            distance[index] = m/1000
             if km > current_km:
                 kilometres.append(timestamp[index])
                 current_km = km
-            distance[index] = m/1000
 
     def get_km(seconds):
-        count = -1
-        if seconds > kilometres[-1]:
+        if seconds < 0: # report 0 pace for pre-start
+            return (0, 0)
+        elif seconds > kilometres[-1]: # report 0 pace for final part-kilometre
             return (0, len(kilometres)-1)
 
-        for km in kilometres: # list of kilometre start times
+        count = 0
+        for km in kilometres[1:]: # list of kilometre start times
             if km <= seconds:
                 count += 1
             else:
