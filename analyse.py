@@ -4,21 +4,23 @@ import sys
 import csv
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
+from fitparse import FitFile
 
 def extract(filename):
     timestamp = []
     distance = []
     speed = []
 
-    with open(filename) as csvfile:
-        alldata = csv.reader(csvfile, delimiter=',')
-        oneskipped = False
-        for row in alldata: # discard line containing column title text
-            if oneskipped:
-                timestamp.append(int(float(row[0])))
-                distance.append(float(row[1]))
-                speed.append(float(row[2])*3.6) # convert m/s to km/h here
-            oneskipped = True
+    fitfile = FitFile(filename)
+
+    for record in fitfile.get_messages('record'):
+        for record_data in record:
+            if record_data.name == 'timestamp':
+                timestamp.append(record_data.value)
+            elif record_data.name == 'distance':
+                distance.append(record_data.value)
+            elif record_data.name == 'speed':
+                speed.append(record_data.value*3.6) # convert m/s to km/h here
 
     return timestamp, distance, speed
 
@@ -38,17 +40,18 @@ if __name__ == '__main__' :
 
     racemode = False
 
-    if len(sys.argv) == 3:
+    if len(sys.argv) >= 3:
         filename = sys.argv[2]
         if (sys.argv[1] == '--race') or (sys.argv[1] == '-r'):
-           racemode = True
+            racemode = True
         else:
-           print("Unrecognised option. Use none, --race or -r\n")
+            print("Unrecognised option. Use none, --race or -r\n")
+            print("Usage: analyse.py [-r|--race] <decodedfitfle.csv>\n")
 
-    if len(sys.argv) == 2:
+    elif len(sys.argv) == 2:
         filename = sys.argv[1]
 
-    if len(sys.argv) == 1:
+    elif len(sys.argv) == 1:
         print("Usage: analyse.py [-r|--race] <decodedfitfle.csv>\n")
         exit()
 
@@ -60,14 +63,14 @@ if __name__ == '__main__' :
     else:
         start_index = 0
 
-    starttime   = timestamp[start_index]
-    startdist   = distance[start_index]
-    kilometres  = [0] # first in list of kilometre start times
-    current_km  = 0
+    starttime  = timestamp[start_index]
+    startdist  = distance[start_index]
+    kilometres = [0] # first in list of kilometre start times
+    current_km = 0
 
     # move time zero to the start_index: values before start become negative
     for index in range(len(timestamp)):
-        timestamp[index] -= starttime
+        timestamp[index] = (timestamp[index] - starttime).seconds
 
         # use actual distance prior to start and modulus 1km thereafter
         if distance[index] < startdist:
@@ -136,9 +139,8 @@ if __name__ == '__main__' :
                 minutes, seconds = divmod(int(pos[0]), 60)
                 spd_anno.set_text("Time {:02d}:{:02d}\nSpeed {:.1f}km/h".format(minutes, seconds, pos[1]))
                 fig.canvas.draw_idle()
-            else:
-                if spd_vis:
-                    fig.canvas.draw_idle()
+            elif spd_vis:
+                fig.canvas.draw_idle()
 
         if event.inaxes == dst_axes:
             cont, ind = dst_scat.contains(event) # mouse event on scatter obj?
@@ -151,9 +153,8 @@ if __name__ == '__main__' :
                 paceminutes, paceseconds = divmod(kmseconds, 60)
                 dst_anno.set_text("Time {:02d}:{:02d}\nDistance {:.2f}km\nPace {:02d}:{:02d}".format(minutes, seconds, kmnumber + pos[1], paceminutes, paceseconds))
                 fig.canvas.draw_idle()
-            else:
-                if dst_vis:
-                    fig.canvas.draw_idle()
+            elif dst_vis:
+                fig.canvas.draw_idle()
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
     # ANNOTATION END
