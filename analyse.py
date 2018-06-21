@@ -64,6 +64,7 @@ if __name__ == '__main__' :
         if not racemode or not csvmode:
             print("Unrecognised option. Use none, --race or -r, --csv or -c\n")
             print("Usage: analyse.py [-r|--race] [-c|--csv] <filename>\n")
+            exit()
 
     elif len(sys.argv) == 3:
         filename = sys.argv[2]
@@ -77,6 +78,7 @@ if __name__ == '__main__' :
         else:
             print("Unrecognised option. Use none, --race or -r, --csv or -c\n")
             print("Usage: analyse.py [-r|--race] [-c|--csv] <filename>\n")
+            exit()
 
     elif len(sys.argv) == 2:
         filename = sys.argv[1]
